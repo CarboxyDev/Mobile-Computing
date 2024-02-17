@@ -34,10 +34,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arman.thefirstandroidapp.ui.components.AtomicButton
 import com.arman.thefirstandroidapp.ui.components.AtomicProgressBar
 import com.arman.thefirstandroidapp.ui.theme.Colors
 import com.arman.thefirstandroidapp.ui.theme.TheFirstAndroidAppTheme
+import java.math.RoundingMode
+import java.text.DecimalFormat
+import kotlin.math.truncate
 
 
 class MainActivity : ComponentActivity() {
@@ -53,22 +57,22 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class Location(var name: String, var distanceToNext: Double)
+data class Location(var name: String, var distanceToNext: Float)
 
 
 @Composable
 fun MainApplication() {
-    var locations = listOf(
-        Location("New York", 5.0),
-        Location("Los Angeles", 8.0),
-        Location("Chicago", 6.0),
-        Location("Houston", 4.0),
-        Location("Phoenix", 7.0),
-        Location("Philadelphia", 3.0),
-        Location("San Antonio", 9.0),
-        Location("San Diego", 2.0),
-        Location("Dallas", 5.0),
-        Location("San Jose", 6.0)
+    val locations = listOf(
+        Location("New York", 0.0f),
+        Location("Los Angeles", 8.0f),
+        Location("Chicago", 6.0f),
+        Location("Houston", 4.0f),
+        Location("Phoenix", 7.0f),
+        Location("Philadelphia", 3.0f),
+        Location("San Antonio", 9.0f),
+        Location("San Diego", 2.0f),
+        Location("Dallas", 5.0f),
+        Location("San Jose", 6.0f)
     )
 
     /** States to be tracked */
@@ -76,6 +80,9 @@ fun MainApplication() {
     var atLocationIndex by remember {
         mutableIntStateOf(0)
     };
+    var distanceInMiles by remember {
+        mutableIntStateOf(0);
+    }
 
 
 
@@ -87,7 +94,7 @@ fun MainApplication() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(320.dp)
+                .height(400.dp)
                 .clip(shape = RoundedCornerShape(8.dp))
                 .background(Colors.zinc800)
                 .shadow(4.dp)
@@ -101,12 +108,21 @@ fun MainApplication() {
                         val activeColor = if (atLocationIndex == index) {Colors.sky500} else {
                             Color.Transparent}
                         Box(
-                            modifier = Modifier.padding(end = 6.dp).clip(shape = CircleShape).size(8.dp).background(activeColor)
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .clip(shape = CircleShape)
+                                .size(8.dp)
+                                .background(activeColor)
                         )
                         Text(text = location.name, color = Colors.zinc200);
                     }
-
-                    Text(text = location.distanceToNext.toString() + " Km", color = Colors.zinc400);
+                    var distanceUnit = " Km";
+                    var distance = location.distanceToNext;
+                    if (distanceInMiles == 1) {
+                        distanceUnit = " mi"
+                        distance = convertDistance(distance, true);
+                    }
+                    Text(text = formatDistance(distance) + distanceUnit, color = Colors.zinc400);
                 }
 
             }
@@ -114,10 +130,30 @@ fun MainApplication() {
         Column (
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp)
+                .padding(top = 24.dp)
         ) {
             val progress = (atLocationIndex.toDouble() / locations.size) * 100;
             AtomicProgressBar(progress);
+        }
+        Column (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp, start = 8.dp)) {
+            var coveredDistance = locations.subList(0, atLocationIndex + 1)
+                .sumOf { it.distanceToNext.toDouble() }.toFloat();
+            var totalDistance = locations.sumOf { it.distanceToNext.toDouble() }.toFloat();
+            var leftDistance = totalDistance - coveredDistance;
+            var distanceUnit = "Km";
+            if (distanceInMiles == 1) {
+                distanceUnit = "mi";
+                coveredDistance = convertDistance(coveredDistance, true);
+                totalDistance = convertDistance(totalDistance, true);
+                leftDistance = convertDistance(leftDistance, true);
+            }
+
+
+            Text(text = "Distance covered: ${formatDistance(coveredDistance)} of ${formatDistance(totalDistance)} $distanceUnit", color = Colors.zinc300, fontSize = 14.sp);
+            Text(text = "Distance left: ${formatDistance(leftDistance)} $distanceUnit", color = Colors.zinc300, fontSize = 14.sp);
         }
 
         Row(
@@ -131,16 +167,28 @@ fun MainApplication() {
                 atLocationIndex = 0;
             }
             AtomicButton(content = "Next stop", size = Pair(174.dp, 48.dp)) {
-                if (atLocationIndex < locations.size) {
+                if (atLocationIndex < locations.size - 1) {
                     atLocationIndex++;
-                }
 
+                }
             }
+
         }
+        var conversionButtonText = "Km to miles";
+        if (distanceInMiles == 1) {
+            conversionButtonText = "Miles to Km";
+        }
+
         Row(modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 12.dp)) {
-            AtomicButton(content = "Km to miles", size = Pair(160.dp, 48.dp), fullWidth = true) { }
+            AtomicButton(content = conversionButtonText, size = Pair(160.dp, 48.dp), fullWidth = true, outline = true) {
+                distanceInMiles = if (distanceInMiles == 0) {
+                    1;
+                } else {
+                    0;
+                }
+            }
         }
     }
 }
@@ -152,4 +200,20 @@ fun DefaultPreview() {
     TheFirstAndroidAppTheme {
         MainApplication()
     }
+}
+
+/** Utility methods go here **/
+
+fun convertDistance(distance: Float, toMiles: Boolean ): Float {
+    return if (toMiles) {
+        distance * 0.621371f // Convert kilometers to miles
+    } else {
+        distance * 1.60934f // Convert miles to kilometers
+    }
+}
+
+fun formatDistance(distance: Float): String {
+    return DecimalFormat("#.##")
+        .apply { roundingMode = RoundingMode.FLOOR }
+        .format(distance).toString();
 }

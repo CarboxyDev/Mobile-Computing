@@ -1,5 +1,6 @@
 package com.arman.thefirstandroidapp.ui.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -18,11 +19,20 @@ import com.arman.thefirstandroidapp.ui.theme.Colors
 
 
 @Composable
-fun AtomicButton(content: String, size: Pair<Dp, Dp>, fullWidth: Boolean? = false, onClick: () -> Unit) {
-    var modifier = if (fullWidth == true) {
+fun AtomicButton(content: String, size: Pair<Dp, Dp>, fullWidth: Boolean? = false, outline: Boolean? = false, onClick: () -> Unit) {
+    val modifier = if (fullWidth == true) {
         Modifier.fillMaxWidth().height(size.second);
     } else {
         Modifier.size(size.first, size.second)
+    }
+
+    if (outline == true) {
+        Button(onClick = onClick, colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = Colors.sky500
+        ), modifier = modifier.shadow(4.dp).border(width = 2.dp, color = Colors.sky500, shape = RoundedCornerShape(4.dp))) {
+            Text(text = content)
+        }
+        return
     }
 
     Button(onClick = onClick, colors = ButtonDefaults.buttonColors(
