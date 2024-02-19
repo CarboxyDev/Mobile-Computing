@@ -96,7 +96,7 @@ fun MainApplication() {
     Column(modifier = Modifier
         .fillMaxSize()
         .background(Colors.zinc900)
-        .padding(18.dp, 16.dp)
+        .padding(top=64.dp, bottom=18.dp, start=16.dp, end=16.dp)
         ) {
         LocationColumn(isLazy = isLazyModeOn, locations = locations, atLocationIndex = atLocationIndex, distanceInMiles = distanceInMiles);
 
