@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.arman.thefirstandroidapp.Location
 import com.arman.thefirstandroidapp.ui.theme.Colors
@@ -24,7 +23,6 @@ fun LocationColumn(isLazy: Boolean, locations: List<Location>, atLocationIndex: 
         .height(395.dp)
         .clip(shape = RoundedCornerShape(8.dp))
         .background(Colors.zinc800)
-        .shadow(4.dp)
         .padding(vertical = 16.dp, horizontal = 18.dp)
 
     if (isLazy) {
