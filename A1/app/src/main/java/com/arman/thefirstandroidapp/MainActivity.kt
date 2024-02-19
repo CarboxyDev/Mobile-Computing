@@ -6,18 +6,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,20 +21,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arman.thefirstandroidapp.ui.components.AtomicButton
 import com.arman.thefirstandroidapp.ui.components.AtomicProgressBar
+import com.arman.thefirstandroidapp.ui.components.LocationColumn
 import com.arman.thefirstandroidapp.ui.theme.Colors
 import com.arman.thefirstandroidapp.ui.theme.TheFirstAndroidAppTheme
 import java.math.RoundingMode
 import java.text.DecimalFormat
-import kotlin.math.truncate
 
 
 class MainActivity : ComponentActivity() {
@@ -62,7 +52,7 @@ data class Location(var name: String, var distanceToNext: Float)
 
 @Composable
 fun MainApplication() {
-    val locations = listOf(
+    val locationsMinimum = listOf(
         Location("New York", 0.0f),
         Location("Los Angeles", 8.0f),
         Location("Chicago", 6.0f),
@@ -75,8 +65,25 @@ fun MainApplication() {
         Location("San Jose", 6.0f)
     )
 
-    /** States to be tracked */
+    /** For Lazy Column */
+    val locationsExtra = listOf(
+        Location("Austin", 3.0f),
+        Location("Seattle", 10.0f),
+        Location("Miami", 7.0f),
+        Location("Atlanta", 5.0f),
+        Location("Denver", 6.0f)
+    );
 
+    /** Change this during the demo to demonstrate lazy column */
+    val isLazyModeOn = true;
+    val locations = if (!isLazyModeOn) {
+        locationsMinimum;
+    } else {
+        locationsMinimum + locationsExtra;
+    }
+
+
+    /** States to be tracked */
     var atLocationIndex by remember {
         mutableIntStateOf(0)
     };
@@ -90,49 +97,18 @@ fun MainApplication() {
         .fillMaxSize()
         .background(Colors.zinc900)
         .padding(18.dp, 16.dp)
-        .verticalScroll(rememberScrollState())) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(400.dp)
-                .clip(shape = RoundedCornerShape(8.dp))
-                .background(Colors.zinc800)
-                .shadow(4.dp)
-                .padding(vertical = 16.dp, horizontal = 18.dp)
         ) {
-            for ((index, location) in locations.withIndex()) {
-                Row(modifier = Modifier
-                    .padding(vertical = 6.dp)
-                    .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        val activeColor = if (atLocationIndex == index) {Colors.sky500} else {
-                            Color.Transparent}
-                        Box(
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .clip(shape = CircleShape)
-                                .size(8.dp)
-                                .background(activeColor)
-                        )
-                        Text(text = location.name, color = Colors.zinc200);
-                    }
-                    var distanceUnit = " Km";
-                    var distance = location.distanceToNext;
-                    if (distanceInMiles == 1) {
-                        distanceUnit = " mi"
-                        distance = convertDistance(distance, true);
-                    }
-                    Text(text = formatDistance(distance) + distanceUnit, color = Colors.zinc400);
-                }
+        LocationColumn(isLazy = isLazyModeOn, locations = locations, atLocationIndex = atLocationIndex, distanceInMiles = distanceInMiles);
 
-            }
-        }
         Column (
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 24.dp)
         ) {
-            val progress = (atLocationIndex.toDouble() / locations.size) * 100;
+            val totalDistance = locations.sumOf { it.distanceToNext.toDouble() }.toFloat();
+            val coveredDistance = locations.subList(0, atLocationIndex + 1)
+                .sumOf { it.distanceToNext.toDouble() }.toFloat();
+            val progress = (coveredDistance / totalDistance) * 100;
             AtomicProgressBar(progress);
         }
         Column (
@@ -154,6 +130,8 @@ fun MainApplication() {
 
             Text(text = "Distance covered: ${formatDistance(coveredDistance)} of ${formatDistance(totalDistance)} $distanceUnit", color = Colors.zinc300, fontSize = 14.sp);
             Text(text = "Distance left: ${formatDistance(leftDistance)} $distanceUnit", color = Colors.zinc300, fontSize = 14.sp);
+            Text(text = "Stops: ${atLocationIndex + 1}/${locations.size}", color = Colors.zinc300, fontSize = 14.sp);
+
         }
 
         Row(
