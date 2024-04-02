@@ -36,4 +36,6 @@ object Colors {
     val zinc800 = Color(0xFF1F1F23)
     val zinc900 = Color(0xFF18181b)
     val zinc950 = Color(0xFF09090b)
+
+    val red500 = Color(0xFFe53935)
 }

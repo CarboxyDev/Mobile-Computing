@@ -29,3 +29,8 @@ data class Hourly(
     @SerializedName("temperature_2m")
     val temps: List<Float>
 )
+
+data class WeatherApiError(
+    val reason: String,
+    val error: Boolean
+)

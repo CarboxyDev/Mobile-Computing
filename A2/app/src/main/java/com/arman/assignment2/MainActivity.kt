@@ -36,6 +36,9 @@ import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+
 
 
 class MainActivity : ComponentActivity() {
@@ -65,8 +68,9 @@ fun WeatherRecord(
         }
     }
 
-    val isLoading by viewModel.isLoading.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState();
+    val errorMessage by viewModel.errorMessage.collectAsState();
+    val weatherData by viewModel.weatherData.collectAsState();
 
     Column(
         modifier = Modifier.padding(16.dp),
@@ -77,28 +81,26 @@ fun WeatherRecord(
         Spacer(modifier = Modifier.height(16.dp))
 
         when {
-            viewModel.isLoading.value == true -> {
-                Text(text = "Loading...", color = Colors.white);
+            isLoading -> {
+                Text(text = "Loading...", color = Colors.white)
             }
-            viewModel.errorMessage.value != null -> {
-                Text(text = "Error: ${viewModel.errorMessage.value}", color = Colors.white)
+            errorMessage != null -> {
+                Text(text = "$errorMessage", color = Colors.red500)
             }
-            else -> {
-                val temps = viewModel.weatherData.value?.hourly?.temps;
-                println(temps);
-                if (temps == null) {
-                    Text("No temperatures fetched", color = Colors.white)
-                } else {
-                    val maxTemp = temps.maxOrNull()
-                    val minTemp = temps.minOrNull()
-                    if (maxTemp == null || minTemp == null) {
-                        Text(text = "Data for date not available", color = Colors.white)
+            weatherData != null -> {
+                val temps = weatherData?.hourly?.temps?.filterNotNull();
+                println("Printing temps -> $temps")
+                if (temps != null) {
+                    if (temps.isNotEmpty()) {
+                        Text("Max temp: ${temps.maxOrNull()} °c", color = Colors.white)
+                        Text("Min temp: ${temps.minOrNull()} °c", color = Colors.white)
                     } else {
-                        Text("Max temp: ${maxTemp} °c", color = Colors.white)
-                        Text("Min temp: ${minTemp} °c", color = Colors.white)
+                        Text("No weather data for this date", color = Colors.white)
                     }
                 }
-
+            }
+            else -> {  // Initial State
+                Text("No weather data yet", color =Colors.white)
             }
         }
 
