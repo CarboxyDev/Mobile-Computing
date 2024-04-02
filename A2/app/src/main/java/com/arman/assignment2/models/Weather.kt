@@ -13,22 +13,27 @@ data class WeatherApiResponse(
     @SerializedName("timezone_abbreviation")
     val timezoneAbbr: String,
     val elevation: Float,
-    @SerializedName("hourly_units")
-    val hourlyUnits: HourlyUnits,
-    val hourly: Hourly
+    @SerializedName("daily_units")
+    val dailyUnits: DailyUnits,
+    val daily: Daily,
 )
 
-data class HourlyUnits(
+data class DailyUnits(
     val time: String,
-    @SerializedName("temperature_2m")
-    val temps: String
+    @SerializedName("temperature_2m_max")
+    val maxTemps: String,
+    @SerializedName("temperature_2m_min")
+    val minTemps: String
 )
 
-data class Hourly(
+data class Daily(
     val time: List<String>,
-    @SerializedName("temperature_2m")
-    val temps: List<Float>
+    @SerializedName("temperature_2m_max")
+    val maxTemps: List<Float>,
+    @SerializedName("temperature_2m_min")
+    val minTemps: List<Float>
 )
+
 
 data class WeatherApiError(
     val reason: String,

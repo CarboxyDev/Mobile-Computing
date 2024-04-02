@@ -46,23 +46,18 @@ class WeatherViewModel : ViewModel() {
                     .build()
 
                 val weatherApi = retrofit.create(WeatherApi::class.java)
-                val response = weatherApi.getHistoricalWeatherData(latitude, longitude, "temperature_2m", startDate, endDate).execute()
+                val response = weatherApi.getHistoricalWeatherData(latitude, longitude, "temperature_2m_max,temperature_2m_min", startDate, endDate).execute()
 
                 if (response.isSuccessful) {
                     val weatherData = response.body()
                     // Handle weather data
                     println("Fetched weather data: ");
-                    println(
-                        "Temps: ${weatherData?.hourly?.temps}"
-                    )
+                    println(weatherData)
                     _weatherData.value = response.body();
                     _errorMessage.value = null;
                 } else {
                     // Handle API errors
                     println("Error in API response")
-//                    println(
-//                        "Error message: ${response.errorBody()?.string()}"
-//                    )
                     val errorBody = response.errorBody()?.string();
                     println("Error body -> $errorBody")
                     if (errorBody != null) {

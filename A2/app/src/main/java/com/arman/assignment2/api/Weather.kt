@@ -12,7 +12,7 @@ interface WeatherApi {
     fun getHistoricalWeatherData(
         @Query("latitude") latitude: Float,
         @Query("longitude") longitude: Float,
-        @Query("hourly") hourlyParameters: String,  // Example: "temperature_2m"
+        @Query("daily") hourlyParameters: String,
         @Query("start_date") startDate: String,
         @Query("end_date") endDate: String
     ): Call<WeatherApiResponse>

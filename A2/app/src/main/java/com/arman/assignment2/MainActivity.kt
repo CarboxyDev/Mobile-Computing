@@ -88,16 +88,17 @@ fun WeatherRecord(
                 Text(text = "$errorMessage", color = Colors.red500)
             }
             weatherData != null -> {
-                val temps = weatherData?.hourly?.temps?.filterNotNull();
-                println("Printing temps -> $temps")
-                if (temps != null) {
-                    if (temps.isNotEmpty()) {
-                        Text("Max temp: ${temps.maxOrNull()} °c", color = Colors.white)
-                        Text("Min temp: ${temps.minOrNull()} °c", color = Colors.white)
-                    } else {
-                        Text("No weather data for this date", color = Colors.white)
-                    }
+                val maxTemps = weatherData?.daily?.maxTemps;
+                val minTemps = weatherData?.daily?.minTemps;
+
+                if (maxTemps == null || minTemps == null) {
+                    Text("No weather data found", color = Colors.red500)
+                    return
+                } else {
+                    Text("Max Temp: ${maxTemps[0]}", color = Colors.white)
+                    Text("Min Temp: ${minTemps[0]}", color = Colors.white)
                 }
+
             }
             else -> {  // Initial State
                 Text("No weather data yet", color =Colors.white)
@@ -112,8 +113,8 @@ fun WeatherRecord(
 
         ) {
             val latitude = 28.7041f;
-            val longitude = 77.1025f;
-            val startDate = date.value.plusDays(-1).toString()
+            val longitude = -77.1025f;
+            val startDate = date.value.toString()
             val endDate = date.value.toString()
             viewModel.fetchHistoricalWeather(latitude, longitude, startDate, endDate)
         }
@@ -131,8 +132,6 @@ fun MainApplication() {
 
     val openDialog = remember { mutableStateOf(false) }
     val dialogState = rememberMaterialDialogState()
-
-    // API URL: "https://archive-api.open-meteo.com/v1/archive?latitude=52.55&longitude=13.41&hourly=temperature_2m&start_date={start_date}&end_date={end_date}"
 
     Column(modifier = Modifier
         .fillMaxSize()
