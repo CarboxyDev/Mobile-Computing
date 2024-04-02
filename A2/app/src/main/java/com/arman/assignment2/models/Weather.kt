@@ -6,7 +6,7 @@ data class WeatherApiResponse(
     val latitude: Float,
     val longitude: Float,
     @SerializedName("generationtime_ms")
-    val generationtimeInMs: Long,
+    val generationtimeInMs: Double,
     @SerializedName("utc_offset_seconds")
     val utcOffsetInSeconds: Int,
     val timezone: String,
