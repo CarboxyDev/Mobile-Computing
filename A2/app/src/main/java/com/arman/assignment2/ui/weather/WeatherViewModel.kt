@@ -55,17 +55,32 @@ class WeatherViewModel : ViewModel() {
                     println(
                         "Temps: ${weatherData?.hourly?.temps}"
                     )
-                    _weatherData.value = response.body()
+                    _weatherData.value = response.body();
+                    _errorMessage.value = null;
                 } else {
                     // Handle API errors
                     println("Error in API response")
-                    println(
-                        "Error message: ${response.errorBody()?.string()}"
-                    )
-                    val errorBody = response.errorBody()?.string()
+//                    println(
+//                        "Error message: ${response.errorBody()?.string()}"
+//                    )
+                    val errorBody = response.errorBody()?.string();
+                    println("Error body -> $errorBody")
                     if (errorBody != null) {
                         val error = Gson().fromJson(errorBody, WeatherApiError::class.java)
-                        _errorMessage.value = error.reason
+                        val errorReason = error.reason
+
+                        if (errorReason.contains("end_date")) {
+                            _errorMessage.value = "No weather data available for this date"
+                        }
+                        else if (
+                            errorReason.contains("start_date")
+                        ) {
+                            _errorMessage.value = "No weather data available for this date"
+                        }
+                        else {
+                            _errorMessage.value = error.reason
+                        }
+
                     } else {
                         _errorMessage.value = "API error"
                     }

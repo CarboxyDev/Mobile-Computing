@@ -111,8 +111,8 @@ fun WeatherRecord(
             content = "Get Temperatures"
 
         ) {
-            val latitude = 52.55f
-            val longitude = 13.41f
+            val latitude = 28.7041f;
+            val longitude = 77.1025f;
             val startDate = date.value.plusDays(-1).toString()
             val endDate = date.value.toString()
             viewModel.fetchHistoricalWeather(latitude, longitude, startDate, endDate)
