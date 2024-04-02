@@ -13,7 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.arman.thefirstandroidapp.ui.theme.Colors
+import androidx.compose.ui.unit.sp
+import com.arman.assignment2.ui.theme.Colors
 
 
 
@@ -29,7 +30,7 @@ fun AtomicButton(content: String, size: Pair<Dp, Dp>, fullWidth: Boolean? = fals
         Button(onClick = onClick, colors = ButtonDefaults.outlinedButtonColors(
             contentColor = Colors.sky500
         ), modifier = modifier.shadow(4.dp).border(width = 2.dp, color = Colors.sky500, shape = RoundedCornerShape(4.dp))) {
-            Text(text = content)
+            Text(text = content, fontSize = 18.sp)
         }
         return
     }
@@ -38,6 +39,6 @@ fun AtomicButton(content: String, size: Pair<Dp, Dp>, fullWidth: Boolean? = fals
         containerColor = Colors.sky500,
         contentColor = Colors.white
     ), modifier = modifier.shadow(4.dp), shape = RoundedCornerShape(4.dp)) {
-        Text(text = content)
+        Text(text = content, fontSize = 18.sp)
     }
 }
