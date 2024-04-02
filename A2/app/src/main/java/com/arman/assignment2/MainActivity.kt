@@ -38,7 +38,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-
+import androidx.compose.ui.unit.min
 
 
 class MainActivity : ComponentActivity() {
@@ -91,16 +91,28 @@ fun WeatherRecord(
                 val maxTemps = weatherData?.daily?.maxTemps;
                 val minTemps = weatherData?.daily?.minTemps;
 
+                println("Max_temps -> $maxTemps");
+
                 if (maxTemps == null || minTemps == null) {
-                    Text("No weather data found", color = Colors.red500)
-                    return
-                } else {
-                    Text("Max Temp: ${maxTemps[0]}", color = Colors.white)
-                    Text("Min Temp: ${minTemps[0]}", color = Colors.white)
+                    Text("No weather data found for the date", color = Colors.red500)
+                }
+                else if (maxTemps.isEmpty() || minTemps.isEmpty()) {
+                    Text("No weather data found for the date", color = Colors.red500)
+                }
+                else {
+                    val maxTemp: Float? = maxTemps[0]
+                    val minTemp: Float? = minTemps[0]
+                    if (maxTemp == null || minTemp == null) {
+                        Text("No weather data found for the date", color = Colors.red500)
+
+                    } else {
+                        Text("Max Temp: $maxTemp ºc", color = Colors.white)
+                        Text("Min Temp: $minTemp ºc", color = Colors.white)
+                    }
                 }
 
             }
-            else -> {  // Initial State
+            else -> {
                 Text("No weather data yet", color =Colors.white)
             }
         }

@@ -1,11 +1,15 @@
 package com.arman.assignment2.ui.weather
 
+import android.app.Application
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.Room
 import com.arman.assignment2.api.WeatherApi
+import com.arman.assignment2.data.db.AppDatabase
 import com.arman.assignment2.models.WeatherApiError
 import com.arman.assignment2.models.WeatherApiResponse
 import com.google.gson.Gson
@@ -19,7 +23,11 @@ import okhttp3.logging.HttpLoggingInterceptor.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class WeatherViewModel : ViewModel() {
+class WeatherViewModel(
+    application: Application
+) : AndroidViewModel(
+    application
+) {
     private val BASE_URL = "https://archive-api.open-meteo.com";
     private val _weatherData = MutableStateFlow<WeatherApiResponse?>(null);
     val weatherData: StateFlow<WeatherApiResponse?> = _weatherData.asStateFlow()
@@ -32,6 +40,15 @@ class WeatherViewModel : ViewModel() {
 
 
     val loggingInterceptor = HttpLoggingInterceptor().setLevel(Level.BODY)
+
+    private val database = Room.databaseBuilder(
+        context = getApplication<Application>(),
+        AppDatabase::class.java,
+        "weather_db"
+    ).build()
+
+    private val weatherDataDao = database.weatherDataDao()
+
 
 
     fun fetchHistoricalWeather(latitude: Float, longitude: Float, startDate: String, endDate: String) {
