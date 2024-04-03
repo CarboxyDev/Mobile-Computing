@@ -39,6 +39,7 @@ import java.time.format.DateTimeFormatter
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.min
+import com.arman.assignment2.ui.weather.getMaxAndMinTemps
 
 
 class MainActivity : ComponentActivity() {
@@ -59,7 +60,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun WeatherRecord(
+fun WeatherView(
     date: MutableState<LocalDate>,
 ) {
     val viewModel = viewModel<WeatherViewModel>()
@@ -92,24 +93,17 @@ fun WeatherRecord(
                 val maxTemps = weatherData?.daily?.maxTemps;
                 val minTemps = weatherData?.daily?.minTemps;
 
-                println("Max_temps -> $maxTemps");
+                val maxAndMinTemps = getMaxAndMinTemps(
+                    maxTemps, minTemps
+                )
+                val max = maxAndMinTemps.first;
+                val min = maxAndMinTemps.second;
 
-                if (maxTemps == null || minTemps == null) {
+                if (max == null || min == null) {
                     Text("No weather data found for the date", color = Colors.red500)
-                }
-                else if (maxTemps.isEmpty() || minTemps.isEmpty()) {
-                    Text("No weather data found for the date", color = Colors.red500)
-                }
-                else {
-                    val maxTemp: Float? = maxTemps[0]
-                    val minTemp: Float? = minTemps[0]
-                    if (maxTemp == null || minTemp == null) {
-                        Text("No weather data found for the date", color = Colors.red500)
-
-                    } else {
-                        Text("Max Temp: $maxTemp ºc", color = Colors.white)
-                        Text("Min Temp: $minTemp ºc", color = Colors.white)
-                    }
+                } else {
+                    Text("Max Temp: %.2f ºc".format(max), color = Colors.white)
+                    Text("Min Temp: %.2f ºc".format(min), color = Colors.white)
                 }
 
             }
@@ -160,7 +154,7 @@ fun MainApplication() {
                 dialogState.show();
             }
         }
-        WeatherRecord(
+        WeatherView(
             date = pickedDate,
         )
         MaterialDialog(
@@ -185,7 +179,7 @@ fun MainApplication() {
             datepicker(
                 initialDate = pickedDate.value,
                 title = "Pick a date",
-                allowedDateValidator = { it.isBefore(LocalDate.now()) },
+                allowedDateValidator = { it.isBefore(LocalDate.now().plusDays(360)) },
             ) {
                 pickedDate.value = it
             }

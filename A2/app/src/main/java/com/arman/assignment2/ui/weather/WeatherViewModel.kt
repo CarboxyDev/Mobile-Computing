@@ -23,6 +23,7 @@ import okhttp3.logging.HttpLoggingInterceptor.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.UnknownHostException
+import kotlin.system.exitProcess
 
 class WeatherViewModel(
     application: Application
@@ -78,14 +79,26 @@ class WeatherViewModel(
                         weatherData?.daily?.maxTemps,
                         weatherData?.daily?.minTemps
                     )
+                    val max = maxAndMinTemps.first;
+                    val min = maxAndMinTemps.second;
+
+                    var completed = false;
+
+                    if (max == null || min == null) {
+                        /* Date weather forecast not available as it is in the future */
+                        val aggregatedData = fetchAccumulatedWeatherData(latitude, longitude, startDate, endDate);
+                        _weatherData.value = aggregatedData;
+                        completed = true;
+                    }
+
                     /** Check if already cached, don't insert if already there */
                     val weatherDataCached = weatherDataDao.getWeatherByDate(startDate)
                     if (weatherDataCached == null) {
                         /** Else Insert into local database for caching */
                         val data = WeatherData(
                             date = startDate,
-                            minTemp = maxAndMinTemps.second,
-                            maxTemp = maxAndMinTemps.first,
+                            maxTemp = max,
+                            minTemp = min,
                             longitude = longitude,
                             latitude = latitude
                         )
@@ -93,12 +106,12 @@ class WeatherViewModel(
                         weatherDataDao.insertWeatherData(weatherData = data)
                     }
 
-
-
-
                     println("Fetched weather data: ");
                     println(weatherData)
-                    _weatherData.value = response.body();
+                    if (!completed) {
+                        _weatherData.value = response.body();
+                        completed = true;
+                    }
                     _errorMessage.value = null;
                 } else {
                     // Handle API errors
@@ -109,12 +122,35 @@ class WeatherViewModel(
                         val error = Gson().fromJson(errorBody, WeatherApiError::class.java)
                         val errorReason = error.reason
 
-                        if (errorReason.contains("end_date")) {
-                            _errorMessage.value = "No weather data available for this date"
-                        } else if (
-                            errorReason.contains("start_date")
-                        ) {
-                            _errorMessage.value = "No weather data available for this date"
+                        if (errorReason.contains("end_date") || errorReason.contains("start_date")) {
+                            // Prediction time
+                            /* Date weather forecast not available as it is in the future */
+                            val aggregatedData = fetchAccumulatedWeatherData(latitude, longitude, startDate, endDate);
+                            _weatherData.value = aggregatedData;
+                            _errorMessage.value = null;
+
+                            val maxAndMinTemps = getMaxAndMinTemps(
+                                aggregatedData.daily.maxTemps,
+                                aggregatedData.daily.minTemps
+                            )
+                            val max = maxAndMinTemps.first;
+                            val min = maxAndMinTemps.second;
+
+                            /** Check if already cached, don't insert if already there */
+                            val weatherDataCached = weatherDataDao.getWeatherByDate(startDate)
+                            if (weatherDataCached == null) {
+                                /** Else Insert into local database for caching */
+                                val data = WeatherData(
+                                    date = startDate,
+                                    maxTemp = max,
+                                    minTemp = min,
+                                    longitude = longitude,
+                                    latitude = latitude
+                                )
+
+                                weatherDataDao.insertWeatherData(weatherData = data)
+                            }
+
                         } else {
                             _errorMessage.value = error.reason
                         }
@@ -185,6 +221,70 @@ class WeatherViewModel(
 }
 
 
+private suspend fun fetchAccumulatedWeatherData(
+    latitude: Float,
+    longitude: Float,
+    startDate: String,
+    endDate: String,
+): WeatherApiResponse {
+    val data = mutableListOf<WeatherApiResponse>();
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://archive-api.open-meteo.com")
+        .client(OkHttpClient.Builder().addInterceptor(HttpLoggingInterceptor().setLevel(Level.BODY)).build())
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+    val currentYear = startDate.split("-")[0].toInt();
+    for (year in currentYear - 1 downTo currentYear - 10) {
+        println("Fetching data for year $year")
+        val weatherApi = retrofit.create(WeatherApi::class.java)
+        val response = weatherApi.getHistoricalWeatherData(
+            latitude,
+            longitude,
+            "temperature_2m_max,temperature_2m_min",
+            "$year-${startDate.split("-")[1]}-${startDate.split("-")[2]}",
+            "$year-${endDate.split("-")[1]}-${endDate.split("-")[2]}"
+        ).execute()
+        if (response.isSuccessful) {
+            data.add(response.body()!!)
+        }
+    }
+    println("Accumulated data -> $data");
+    val temps = Daily(
+        maxTemps = data.flatMap { it.daily.maxTemps },
+        minTemps = data.flatMap { it.daily.minTemps },
+        time = data.flatMap { it.daily.time }
+    )
+    println("average temps -> $temps")
+    val averageTemps = Daily(
+        maxTemps = calculateAverageOfFloatList(temps.maxTemps)?.let { listOf(it) } ?: listOf(
+            null
+        ),
+        minTemps = calculateAverageOfFloatList(temps.minTemps)?.let { listOf(it) } ?: listOf(
+            null
+        ),
+        time = listOf(startDate)
+    )
+    println("average temps for last 10 years aggregated-> $averageTemps")
+    val aggregatedData = WeatherApiResponse(
+        latitude = latitude,
+        longitude = longitude,
+        dailyUnits = DailyUnits(
+            time = "seconds",
+            maxTemps = "celsius",
+            minTemps = "celsius"
+        ),
+        daily = averageTemps,
+        utcOffsetInSeconds = 0,
+        generationtimeInMs = 0.0,
+        timezoneAbbr = "GMT",
+        timezone = "GMT",
+        elevation = 0.0f,
+    )
+    return aggregatedData;
+
+}
+
+
 fun getMaxAndMinTemps(
     maxTemps: List<Float?>?,
     minTemps: List<Float?>?
@@ -206,4 +306,13 @@ fun getMaxAndMinTemps(
         }
     }
 
+}
+
+fun calculateAverageOfFloatList(data: List<Float?>): Float? {
+    val validValues = data.filterNotNull() // Filter out null values
+    return if (validValues.isNotEmpty()) {
+        validValues.sum() / validValues.size.toFloat()
+    } else {
+        null // Return null if there are no valid values
+    }
 }
