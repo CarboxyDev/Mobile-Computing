@@ -1,21 +1,18 @@
 package com.arman.assignment2.ui.weather
 
 import android.app.Application
-import androidx.compose.material3.Text
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.arman.assignment2.api.WeatherApi
 import com.arman.assignment2.data.db.AppDatabase
 import com.arman.assignment2.data.db.WeatherData
+import com.arman.assignment2.models.Daily
+import com.arman.assignment2.models.DailyUnits
 import com.arman.assignment2.models.WeatherApiError
 import com.arman.assignment2.models.WeatherApiResponse
-import com.arman.assignment2.ui.theme.Colors
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,8 +22,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.logging.HttpLoggingInterceptor.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.net.UnknownHostException
 
 class WeatherViewModel(
     application: Application
@@ -57,10 +53,11 @@ class WeatherViewModel(
 
 
     fun fetchHistoricalWeather(latitude: Float, longitude: Float, startDate: String, endDate: String) {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             _isLoading.value = true;
             println("Fetching weather data...")
             try {
+                /* Try fetching from cache first */
                 val retrofit = Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .client(OkHttpClient.Builder().addInterceptor(loggingInterceptor).build())
@@ -68,7 +65,13 @@ class WeatherViewModel(
                     .build()
 
                 val weatherApi = retrofit.create(WeatherApi::class.java)
-                val response = weatherApi.getHistoricalWeatherData(latitude, longitude, "temperature_2m_max,temperature_2m_min", startDate, endDate).execute()
+                val response = weatherApi.getHistoricalWeatherData(
+                    latitude,
+                    longitude,
+                    "temperature_2m_max,temperature_2m_min",
+                    startDate,
+                    endDate
+                ).execute()
 
                 if (response.isSuccessful) {
                     val weatherData = response.body();
@@ -76,7 +79,7 @@ class WeatherViewModel(
                         weatherData?.daily?.maxTemps,
                         weatherData?.daily?.minTemps
                     )
-
+                    /** Check if already cached, don't insert if already there */
 
                     /** Insert into local database for caching */
                     val data = WeatherData(
@@ -104,13 +107,11 @@ class WeatherViewModel(
 
                         if (errorReason.contains("end_date")) {
                             _errorMessage.value = "No weather data available for this date"
-                        }
-                        else if (
+                        } else if (
                             errorReason.contains("start_date")
                         ) {
                             _errorMessage.value = "No weather data available for this date"
-                        }
-                        else {
+                        } else {
                             _errorMessage.value = error.reason
                         }
 
@@ -118,6 +119,42 @@ class WeatherViewModel(
                         _errorMessage.value = "API error"
                     }
                     throw Exception("API error")
+                }
+
+            } catch (exception: UnknownHostException) {
+                println("No internet connection");
+                /* Attempt to get weather data from cache */
+                println("Scan cache for date = `$startDate`")
+                val weatherData = weatherDataDao.getWeatherByDate(startDate)
+                println("WeatherData in cache -> $weatherData");
+                if (weatherData == null) {
+                    _errorMessage.value = "No internet connection or cached weather data available"
+                } else {
+                    println("Cache entry found. Aggregating data.")
+                    val temps = weatherData.let {
+                        Daily(
+                            maxTemps = listOf(it.maxTemp),
+                            minTemps = listOf(it.minTemp),
+                            time = listOf(startDate)
+                        )
+                    }
+                    val cachedData = WeatherApiResponse(
+                        latitude = weatherData.latitude,
+                        longitude = weatherData.longitude,
+                        dailyUnits = DailyUnits(
+                            time = "seconds",
+                            maxTemps = "celsius",
+                            minTemps = "celsius"
+                        ),
+                        daily = temps,
+                        utcOffsetInSeconds = 0,
+                        generationtimeInMs = 0.0,
+                        timezoneAbbr = "GMT",
+                        timezone = "GMT",
+                        elevation = 0.0f,
+                    )
+                    _weatherData.value = cachedData;
+                    _errorMessage.value = null;
                 }
 
             } catch (exception: Exception) {
@@ -145,8 +182,8 @@ class WeatherViewModel(
 
 
 fun getMaxAndMinTemps(
-    maxTemps: List<Float>?,
-    minTemps: List<Float>?
+    maxTemps: List<Float?>?,
+    minTemps: List<Float?>?
 ): Pair<Float?, Float?> {
     if (maxTemps == null || minTemps == null) {
         return Pair(null, null);

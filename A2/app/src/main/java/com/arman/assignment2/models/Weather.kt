@@ -1,6 +1,5 @@
 package com.arman.assignment2.models
 
-import com.arman.assignment2.data.db.WeatherData
 import com.google.gson.annotations.SerializedName
 
 data class WeatherApiResponse(
@@ -30,9 +29,9 @@ data class DailyUnits(
 data class Daily(
     val time: List<String>,
     @SerializedName("temperature_2m_max")
-    val maxTemps: List<Float>,
+    val maxTemps: List<Float?>,
     @SerializedName("temperature_2m_min")
-    val minTemps: List<Float>
+    val minTemps: List<Float?>
 )
 
 
