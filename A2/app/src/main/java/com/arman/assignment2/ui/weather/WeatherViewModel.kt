@@ -57,7 +57,6 @@ class WeatherViewModel(
             _isLoading.value = true;
             println("Fetching weather data...")
             try {
-                /* Try fetching from cache first */
                 val retrofit = Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .client(OkHttpClient.Builder().addInterceptor(loggingInterceptor).build())
@@ -80,17 +79,22 @@ class WeatherViewModel(
                         weatherData?.daily?.minTemps
                     )
                     /** Check if already cached, don't insert if already there */
+                    val weatherDataCached = weatherDataDao.getWeatherByDate(startDate)
+                    if (weatherDataCached == null) {
+                        /** Else Insert into local database for caching */
+                        val data = WeatherData(
+                            date = startDate,
+                            minTemp = maxAndMinTemps.second,
+                            maxTemp = maxAndMinTemps.first,
+                            longitude = longitude,
+                            latitude = latitude
+                        )
 
-                    /** Insert into local database for caching */
-                    val data = WeatherData(
-                        date = startDate,
-                        minTemp = maxAndMinTemps.second,
-                        maxTemp = maxAndMinTemps.first,
-                        longitude = longitude,
-                        latitude = latitude
-                    )
+                        weatherDataDao.insertWeatherData(weatherData = data)
+                    }
 
-                    weatherDataDao.insertWeatherData(weatherData = data)
+
+
 
                     println("Fetched weather data: ");
                     println(weatherData)
