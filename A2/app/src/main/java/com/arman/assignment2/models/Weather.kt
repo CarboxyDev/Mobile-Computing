@@ -1,5 +1,6 @@
 package com.arman.assignment2.models
 
+import com.arman.assignment2.data.db.WeatherData
 import com.google.gson.annotations.SerializedName
 
 data class WeatherApiResponse(
