@@ -19,8 +19,10 @@ import androidx.lifecycle.AndroidViewModel
 import com.arman.assignment3.data.DatabaseRepository
 import com.arman.assignment3.data.db.OrientationAnglesModel
 import com.arman.assignment3.data.db.OrientationEntity
+import java.util.concurrent.TimeUnit
 
-private val SMOOTH_ALPHA = 0.7f;
+private const val SMOOTH_ALPHA = 0.7f;
+private const val CLEAR_DATABASE = false;
 
 fun smoothen(curr: Float, prev: Float): Float {
     return (prev * SMOOTH_ALPHA) + (curr * (1 - SMOOTH_ALPHA));
@@ -47,6 +49,10 @@ class SensorViewModel(application: Application) : AndroidViewModel(application) 
 
     private var lastOrientationAngles = OrientationAnglesModel(0f, 0f, 0f)
 
+    private var lastSaveTime = System.currentTimeMillis()
+
+    private val saveInterval = TimeUnit.MILLISECONDS.toMillis(500) // 500 ms
+
 
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
@@ -68,12 +74,8 @@ class SensorViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private fun calculateOrientation(values: FloatArray) {
-        if (values.size < 3) {
-            Log.d(
-                "Size Error",
-                "Insufficient size of values array"
-            )
-            return
+        if (values.size <= 2) {
+            return;
         }
 
         val rotationMatrix = FloatArray(9)
@@ -110,8 +112,16 @@ class SensorViewModel(application: Application) : AndroidViewModel(application) 
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun saveOrientation(roll: Float, pitch: Float, yaw: Float) {
-        GlobalScope.launch(Dispatchers.IO) {
-            orientationDao.insertOrientationData(OrientationEntity(roll = roll, pitch = pitch, yaw = yaw))
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastSaveTime >= saveInterval) {
+            lastSaveTime = currentTime
+            GlobalScope.launch(Dispatchers.IO) {
+                if (CLEAR_DATABASE) {
+                    orientationDao.deleteAllOrientationData();
+                    
+                }
+                orientationDao.insertOrientationData(OrientationEntity(roll = roll, pitch = pitch, yaw = yaw))
+            }
         }
     }
 
