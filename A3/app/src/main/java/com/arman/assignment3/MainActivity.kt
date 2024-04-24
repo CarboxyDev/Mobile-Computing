@@ -59,6 +59,7 @@ fun PhoneOrientationActivity() {
         Text("Pitch: $pitch", color = Colors.white);
         Text("Yaw  : $yaw", color = Colors.white);
     }
+
 }
 
 @Composable
@@ -72,6 +73,7 @@ fun MainApplication() {
 
     ) {
         PhoneOrientationActivity()
+        PredictedGraphView()
     }
 }
 

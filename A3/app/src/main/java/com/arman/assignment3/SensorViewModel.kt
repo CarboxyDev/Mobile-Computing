@@ -46,11 +46,8 @@ class SensorViewModel(application: Application) : AndroidViewModel(application) 
         context = getApplication(),
     )
     private val orientationDao = databaseRepoStore.getOrientationDao();
-
     private var lastOrientationAngles = OrientationAnglesModel(0f, 0f, 0f)
-
     private var lastSaveTime = System.currentTimeMillis()
-
     private val saveInterval = TimeUnit.MILLISECONDS.toMillis(500) // 500 ms
 
 
@@ -62,10 +59,6 @@ class SensorViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-            Log.d(
-                "Sensor Accuracy",
-                "Sensor: ${sensor}, Accuracy: $accuracy"
-            )
         }
     }
 
@@ -118,7 +111,7 @@ class SensorViewModel(application: Application) : AndroidViewModel(application) 
             GlobalScope.launch(Dispatchers.IO) {
                 if (CLEAR_DATABASE) {
                     orientationDao.deleteAllOrientationData();
-                    
+
                 }
                 orientationDao.insertOrientationData(OrientationEntity(roll = roll, pitch = pitch, yaw = yaw))
             }
