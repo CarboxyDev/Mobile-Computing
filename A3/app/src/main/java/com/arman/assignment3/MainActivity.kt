@@ -1,8 +1,6 @@
 package com.arman.assignment3
 
-import android.content.Context
-import android.content.res.Configuration
-import android.hardware.SensorManager
+import android.content.Intent
 import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
@@ -11,10 +9,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,15 +19,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arman.assignment3.ui.theme.Assignment3Theme
 import com.arman.assignment3.ui.theme.Colors
 
 
-class MainActivity : ComponentActivity() {
+
+public class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val policy = ThreadPolicy.Builder().permitAll().build()
@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PhoneOrientationActivity() {
+fun PhoneOrientation() {
     val sensorViewModel = viewModel<SensorViewModel>();
     val orientation by sensorViewModel.orientationAngles.collectAsState();
 
@@ -60,10 +60,13 @@ fun PhoneOrientationActivity() {
         Text("Yaw  : $yaw", color = Colors.white);
     }
 
+
 }
 
 @Composable
 fun MainApplication() {
+    val context = LocalContext.current
+
     Column(modifier = Modifier
         .fillMaxSize()
         .background(Colors.zinc900)
@@ -72,8 +75,16 @@ fun MainApplication() {
         verticalArrangement = Arrangement.Center
 
     ) {
-        PhoneOrientationActivity()
-        PredictedGraphView()
+        PhoneOrientation()
+        Column(modifier = Modifier.padding(top = 20.dp)) {
+            Button(onClick = {
+                val intent = Intent(context, GraphActivity::class.java)
+                context.startActivity(intent)
+            }) {
+                Text(text = "Graph Activity", color =  Colors.white);
+            }
+        }
+
     }
 }
 

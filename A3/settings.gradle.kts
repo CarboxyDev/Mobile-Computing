@@ -8,7 +8,10 @@ pluginManagement {
             }
         }
         mavenCentral()
-        gradlePluginPortal()
+
+
+
+    gradlePluginPortal()
     }
 }
 dependencyResolutionManagement {
@@ -16,7 +19,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+
+
     }
+
 }
 
 rootProject.name = "Assignment 3"
