@@ -16,7 +16,7 @@ router.get("/", function (req, res, next) {
   const username = req.query.username;
   const password = req.query.password;
   if (!username) {
-    return res.status(400).send("Username is required");
+    return res.status(400).json({ error: "Username is required" });
   }
 
   const payload = {
@@ -43,7 +43,7 @@ router.get("/", function (req, res, next) {
   console.log(token);
   console.log(payload);
 
-  res.send({ token });
+  res.json({ token });
 });
 
 module.exports = router;
