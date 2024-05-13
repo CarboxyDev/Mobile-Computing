@@ -1,5 +1,8 @@
 package com.arman.project
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,10 +20,42 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arman.project.ui.theme.Colors
 import com.arman.project.ui.theme.ProjectTheme
+import org.jitsi.meet.sdk.JitsiMeet
+import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
+import java.net.MalformedURLException
+import java.net.URL
 
 class MainActivity : ComponentActivity() {
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            onBroadcastReceived(intent)
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize default options for Jitsi Meet conferences
+        val serverURL: URL;
+
+        serverURL = try {
+            // When using JaaS, replace "https://meet.jit.si" with the proper serverURL
+            URL("https://8x8.vc")
+        } catch (e: MalformedURLException) {
+            e.printStackTrace()
+            throw RuntimeException("Invalid server URL!")
+        }
+        val defaultOptions = JitsiMeetConferenceOptions.Builder()
+            .setServerURL(serverURL)
+            // When using JaaS, set the obtained JWT here
+            //.setToken("MyJWT")
+            // Different features flags can be set
+            //.setFeatureFlag("toolbox.enabled", false)
+            //.setFeatureFlag("filmstrip.enabled", false)
+            .setFeatureFlag("welcomepage.enabled", false)
+            .build()
+        JitsiMeet.setDefaultConferenceOptions(defaultOptions)
+
+        registerForBroadcastMessages()
         setContent {
             ProjectTheme {
                 Surface(
