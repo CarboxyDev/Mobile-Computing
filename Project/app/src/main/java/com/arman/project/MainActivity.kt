@@ -43,8 +43,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-
 }
 
 @Composable
@@ -53,17 +51,17 @@ fun MainApplication() {
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Welcome to OpenConference", style = Typography.headlineMedium, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 8.dp))
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Click the button below to get started!", style = Typography.labelLarge, textAlign = TextAlign.Center, color = Colors.zinc400);
+        Text("Just enter a username and your friend\'s room name to join them without any hassle!", style = Typography.labelLarge, textAlign = TextAlign.Center, color = Colors.zinc400);
         Spacer(modifier = Modifier.height(32.dp))
         Button(onClick = {
-            val intent = Intent(context, ConferenceActivity::class.java);
+            val intent = Intent(context, ProfileActivity::class.java);
             context.startActivity(intent);
         }, colors = ButtonDefaults.buttonColors(
             containerColor = Colors.sky500,
             contentColor = Colors.white
         ), modifier = Modifier.shadow(4.dp), shape = RoundedCornerShape(4.dp)
         ) {
-            Text("Start a Conference", color = Colors.white, style = Typography.bodyMedium)
+            Text("Get started", color = Colors.white, style = Typography.bodyMedium)
         }
     }
 }

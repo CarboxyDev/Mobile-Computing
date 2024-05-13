@@ -33,10 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.arman.project.ui.theme.Colors
 import com.arman.project.ui.theme.ProjectTheme
+import com.arman.project.ui.theme.Typography
 import org.jitsi.meet.sdk.BroadcastEvent
 import org.jitsi.meet.sdk.BroadcastIntentHelper
 import org.jitsi.meet.sdk.JitsiMeet
@@ -154,10 +156,14 @@ fun ConferenceScreen(appId: String) {
         verticalArrangement = Arrangement.Center
 
     ) {
+        Text("Join Conference", style = Typography.headlineSmall, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("Enter the same conference name as your friend to join their room", style = Typography.labelLarge, textAlign = TextAlign.Center, color = Colors.zinc400);
+        Spacer(modifier = Modifier.height(16.dp))
         TextField(
             value = conferenceName,
             onValueChange = { conferenceName = it },
-            label = { Text("Enter conference name") },
+            label = { Text("Conference name") },
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Colors.white,
                 unfocusedContainerColor = Colors.zinc800,
