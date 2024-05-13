@@ -5,8 +5,6 @@ data class TokenResponse(
 )
 
 
-
-
 data class TokenResponseError(
     val error: String
 )

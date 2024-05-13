@@ -1,8 +1,10 @@
 package com.arman.project
 
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +23,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,9 +35,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.arman.project.ui.theme.Colors
 import com.arman.project.ui.theme.ProjectTheme
 import com.arman.project.ui.theme.Typography
@@ -59,8 +62,30 @@ fun ProfileSetup() {
     val context = LocalContext.current;
     var username by remember { mutableStateOf("John") }
     var password by remember { mutableStateOf("") }
-    var passwordVisibility = remember { mutableStateOf(false) }
+    val viewModel = viewModel<TokenViewModel>();
 
+    val data by viewModel.data.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    // Handle navigation when token is received
+    LaunchedEffect(data) {
+        val token = data?.token;
+        println("Token received: $token")
+        token?.let {
+            val intent = Intent(context, ConferenceActivity::class.java).apply {
+                putExtra("token", it)
+            }
+            context.startActivity(intent)
+            (context as Activity).finish()
+        }
+    }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+        }
+    }
 
 
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -96,14 +121,16 @@ fun ProfileSetup() {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = {
-            val intent = Intent(context, ConferenceActivity::class.java);
-            context.startActivity(intent);
+            viewModel.fetchToken(username, password)
         }, colors = ButtonDefaults.buttonColors(
             containerColor = Colors.sky500,
             contentColor = Colors.white
         ), modifier = Modifier.shadow(4.dp), shape = RoundedCornerShape(4.dp)) {
             Text(text = "Continue", style = Typography.bodyLarge)
         }
-
+        Spacer(modifier = Modifier.height(8.dp))
+        if (isLoading) {
+            Text("Creating user...", style = Typography.bodyMedium)
+        }
     }
 }

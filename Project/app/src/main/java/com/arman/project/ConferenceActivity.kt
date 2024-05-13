@@ -56,7 +56,7 @@ import java.net.URL
 
 class ConferenceActivity : ComponentActivity() {
     val appId = "vpaas-magic-cookie-a4a17f5348dc4ac099eb24c42a83bc7a";
-    val token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InZwYWFzLW1hZ2ljLWNvb2tpZS1hNGExN2Y1MzQ4ZGM0YWMwOTllYjI0YzQyYTgzYmM3YS80MmQ1ZjUifQ.eyJhdWQiOiJqaXRzaSIsImNvbnRleHQiOnsidXNlciI6eyJpZCI6IjMwNjJiNWZiLWVmMDEtNDNlMS04OTg0LTQ4ZDM1OWYxY2M0OSIsIm5hbWUiOiJmb3JzZW4iLCJtb2RlcmF0b3IiOnRydWV9fSwiaXNzIjoidnBhYXMtbWFnaWMtY29va2llLWE0YTE3ZjUzNDhkYzRhYzA5OWViMjRjNDJhODNiYzdhIiwic3ViIjoiaHR0cHM6Ly84eDgudmMiLCJleHAiOjE3MTU2ODk3NzgsImlhdCI6MTcxNTYwMzM3OH0.atKa334rFT4opI60CM5EYtrH23-WF5jtW2fWKPC5Oh3s6R1sCJjoydxUh8Zo-eYxDGb6gwzws_T9bDMfcFXLkpz7sX_eE1ru0hTp_8Oq-DRKtab_we14mZh6W2xMiql-ejh98KbwRUDHOYGD1Yr9VUt6imh5pXItX9990D3DyNYZyon-KcafebPw75Nr4-u_-whHubCg9tdnK7sLxc302NiJI1Yx2qpBaZndzaodkjA_aMea-h9gjzF7P6or4W6D4J-4v5ACaz0CCe1664hvBXVb5qENFeRlEScrePp6UqmNkgt1jl65s8rS_4tqPoRC196Cauzo7dMp33Ch554OjQ";
+    private var token: String? = null;
     val context = this;
 
     private val broadcastReceiver = object : BroadcastReceiver() {
@@ -65,7 +65,12 @@ class ConferenceActivity : ComponentActivity() {
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState);
+
+        token = intent.getStringExtra("token") ?: run {
+            finish()  // Close this activity and return to the previous one
+            return
+        }
 
 
         val serverURL: URL;
