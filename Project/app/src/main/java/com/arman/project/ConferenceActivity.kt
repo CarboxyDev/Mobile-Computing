@@ -86,7 +86,7 @@ class ConferenceActivity : ComponentActivity() {
         val defaultOptions = JitsiMeetConferenceOptions.Builder()
             .setServerURL(serverURL)
             // When using JaaS, set the obtained JWT here
-            .setToken("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InZwYWFzLW1hZ2ljLWNvb2tpZS1hNGExN2Y1MzQ4ZGM0YWMwOTllYjI0YzQyYTgzYmM3YS80MmQ1ZjUifQ.eyJhdWQiOiJqaXRzaSIsImNvbnRleHQiOnsidXNlciI6eyJpZCI6IjdmY2Q1YjBmLWVmNjQtNDE3Yi1iZDMyLWYyMzNjNDJjN2VjZiIsIm5hbWUiOiJkb2ciLCJtb2RlcmF0b3IiOnRydWV9fSwiaXNzIjoidnBhYXMtbWFnaWMtY29va2llLWE0YTE3ZjUzNDhkYzRhYzA5OWViMjRjNDJhODNiYzdhIiwic3ViIjoiaHR0cHM6Ly84eDgudmMiLCJleHAiOjE3MTU2MTU0MDgsIm5iZiI6MTcxNTYxMTUwOCwiaWF0IjoxNzE1NjExODA4fQ.SUhO9ie4qHvTdACHzxXFf3kddM7bJldvWwOcYariUVXh93B-bU8ARvRdPXPn-hskk2W8o2jIpoOwN_bXhniQ_MwvfGlBQCkZTy9yXNqABL6Ebri1FqPZRDiLB4MHkUW7KF8KBtA2yiSBWJWxZjV2J9L5HhTwrs8s9KxsVyoOzKZrygW9ngzekKOvYD9rSz88PZZsWBe38rx8oR2b0M_NPC7is6RSRAFJdLYDFNMnd5cDeudJ4nAlcArNc8qmLhHyC8Pyw4LJ10eV-OTC5WibjY3eQ04M5VVZR1c5CbYKUVzM1HtRWuN1IBn3lpMRnOZ53P3DABqxaEg4R9GZK7p9Eg")
+            .setToken(token)
             .setFeatureFlag("welcomepage.enabled", false)
             .build()
         JitsiMeet.setDefaultConferenceOptions(defaultOptions)
