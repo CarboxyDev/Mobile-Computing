@@ -60,7 +60,7 @@ class ProfileActivity : ComponentActivity() {
 @Composable
 fun ProfileSetup() {
     val context = LocalContext.current;
-    var username by remember { mutableStateOf("John") }
+    var username by remember { mutableStateOf("User") }
     var password by remember { mutableStateOf("") }
     val viewModel = viewModel<TokenViewModel>();
 

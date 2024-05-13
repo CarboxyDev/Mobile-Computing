@@ -25,13 +25,15 @@ router.get("/", function (req, res, next) {
       user: {
         id: uuid(),
         name: username,
+        email: `${username}@test.com`,
         moderator: password === "1234" ? true : false,
       },
     },
-    iss: "vpaas-magic-cookie-a4a17f5348dc4ac099eb24c42a83bc7a", // This should be your Jitsi App ID or similar
-    sub: "https://8x8.vc", // This should be your Jitsi server domain
-    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // Expires in 24 hours
-    nbf: Math.floor(Date.now() / 1000) - 60 * 500, // Not valid before 500 minutes ago
+    room: "*",
+    iss: "chat", // This should be your Jitsi App ID or similar
+    sub: "vpaas-magic-cookie-a4a17f5348dc4ac099eb24c42a83bc7a", // This should be your Jitsi server domain
+    exp: Math.floor(Date.now() / 1000) + 1 * 60 * 60, // Token expires in 1 hour
+    nbf: Math.floor(Date.now() / 1000) - 60 * 5,
   };
 
   const token = jwt.sign(payload, privateKey, {
