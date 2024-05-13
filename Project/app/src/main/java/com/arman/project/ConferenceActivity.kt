@@ -68,7 +68,7 @@ class ConferenceActivity : ComponentActivity() {
         super.onCreate(savedInstanceState);
 
         token = intent.getStringExtra("token") ?: run {
-            finish()  // Close this activity and return to the previous one
+            finish()
             return
         }
 
@@ -81,6 +81,7 @@ class ConferenceActivity : ComponentActivity() {
             e.printStackTrace()
             throw RuntimeException("Invalid server URL!")
         }
+        println("ConferenceActivity -> Token: $token")
         // Default options for meets
         val defaultOptions = JitsiMeetConferenceOptions.Builder()
             .setServerURL(serverURL)

@@ -48,11 +48,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainApplication() {
     val context = LocalContext.current
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Welcome to OpenConference", style = Typography.headlineMedium, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 8.dp))
-        Spacer(modifier = Modifier.height(8.dp))
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Welcome to OpenConference", style = Typography.headlineMedium, textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.height(12.dp))
         Text("Just enter a username and your friend\'s room name to join them without any hassle!", style = Typography.labelLarge, textAlign = TextAlign.Center, color = Colors.zinc400);
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(40.dp))
         Button(onClick = {
             val intent = Intent(context, ProfileActivity::class.java);
             context.startActivity(intent);
@@ -61,7 +61,7 @@ fun MainApplication() {
             contentColor = Colors.white
         ), modifier = Modifier.shadow(4.dp), shape = RoundedCornerShape(4.dp)
         ) {
-            Text("Get started", color = Colors.white, style = Typography.bodyMedium)
+            Text("Get started", color = Colors.white, style = Typography.bodyLarge)
         }
     }
 }

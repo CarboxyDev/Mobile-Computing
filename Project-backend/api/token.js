@@ -31,6 +31,7 @@ router.get("/", function (req, res, next) {
     iss: "vpaas-magic-cookie-a4a17f5348dc4ac099eb24c42a83bc7a", // This should be your Jitsi App ID or similar
     sub: "https://8x8.vc", // This should be your Jitsi server domain
     exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // Expires in 24 hours
+    nbf: Math.floor(Date.now() / 1000) - 60 * 500, // Not valid before 500 minutes ago
   };
 
   const token = jwt.sign(payload, privateKey, {
