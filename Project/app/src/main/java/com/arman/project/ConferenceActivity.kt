@@ -126,6 +126,7 @@ class ConferenceActivity : ComponentActivity() {
     private fun hangUp() {
         val hangupBroadcastIntent: Intent = BroadcastIntentHelper.buildHangUpIntent()
         LocalBroadcastManager.getInstance(this.applicationContext).sendBroadcast(hangupBroadcastIntent)
+
     }
 
 }
@@ -169,8 +170,11 @@ fun ConferenceScreen() {
                 if (conferenceName.isNotEmpty()) {
                     val options = JitsiMeetConferenceOptions.Builder()
                         .setRoom(conferenceName)
-                        .setFeatureFlag("invite.enabled", false)
                         .setVideoMuted(true)
+                        .setFeatureFlag("invite.enabled", false)
+                        .setFeatureFlag("breakout-rooms.enabled", false)
+                        .setFeatureFlag("calendar.enabled", false)
+                        .setFeatureFlag("lobby-mode.enabled", false)
                         .build()
                     JitsiMeetActivity.launch(context, options)
                 } else {
