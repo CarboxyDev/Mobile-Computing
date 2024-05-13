@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.view.View
-import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -48,7 +46,16 @@ import timber.log.Timber
 import java.net.MalformedURLException
 import java.net.URL
 
+/**
+ * Some secret info:
+ * AppId: vpaas-magic-cookie-a4a17f5348dc4ac099eb24c42a83bc7a
+ *
+ */
+
 class ConferenceActivity : ComponentActivity() {
+    val appId = "vpaas-magic-cookie-a4a17f5348dc4ac099eb24c42a83bc7a";
+    val token = "eyJraWQiOiJ2cGFhcy1tYWdpYy1jb29raWUtYTRhMTdmNTM0OGRjNGFjMDk5ZWIyNGM0MmE4M2JjN2EvZGEwMzZhLVNBTVBMRV9BUFAiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJqaXRzaSIsImlzcyI6ImNoYXQiLCJpYXQiOjE3MTU1OTc1MzIsImV4cCI6MTcxNTYwNDczMiwibmJmIjoxNzE1NTk3NTI3LCJzdWIiOiJ2cGFhcy1tYWdpYy1jb29raWUtYTRhMTdmNTM0OGRjNGFjMDk5ZWIyNGM0MmE4M2JjN2EiLCJjb250ZXh0Ijp7ImZlYXR1cmVzIjp7ImxpdmVzdHJlYW1pbmciOnRydWUsIm91dGJvdW5kLWNhbGwiOnRydWUsInNpcC1vdXRib3VuZC1jYWxsIjpmYWxzZSwidHJhbnNjcmlwdGlvbiI6dHJ1ZSwicmVjb3JkaW5nIjp0cnVlfSwidXNlciI6eyJoaWRkZW4tZnJvbS1yZWNvcmRlciI6ZmFsc2UsIm1vZGVyYXRvciI6dHJ1ZSwibmFtZSI6ImFybWFuMjEwMTgiLCJpZCI6Imdvb2dsZS1vYXV0aDJ8MTA4NDUxMTAxODM4MzA2MzQ4MTAxIiwiYXZhdGFyIjoiIiwiZW1haWwiOiJhcm1hbjIxMDE4QGlpaXRkLmFjLmluIn19LCJyb29tIjoiKiJ9.z3RhJKkfTtSX08xPQqK4tBFPrEhyz03dxbMhxLWiWdBIDto534_ShmT1LEXchC2QXOO95OaVlhV11PJ6PboWCQZIR4dJdY4R3SjGSBuExusMcN50f0EtEnWj28JkRGnYXwIoWwyAxBXL6oNAtqnz0daaEv2ksUmSsRMzt17wl-Fff8pCxOmBeohCon4SPF_HztwmFGPHJ2Hq8pc9KWD9ZIxE0WIRV1ofRzMHkT5bDhQZahFrbO5TrAPa73oX5qQlq2JUNH1MoHUzyDvSMN8Mu8nyrMavFaiQ42Vsrd1BTdb5zmB3qbqVchmxC0kV99I1ToQidkn05fmkXbJZWIXy2A";
+
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             onBroadcastReceived(intent)
@@ -70,7 +77,7 @@ class ConferenceActivity : ComponentActivity() {
         val defaultOptions = JitsiMeetConferenceOptions.Builder()
             .setServerURL(serverURL)
             // When using JaaS, set the obtained JWT here
-            //.setToken("MyJWT")
+            .setToken(token)
             .setFeatureFlag("welcomepage.enabled", false)
             .build()
         JitsiMeet.setDefaultConferenceOptions(defaultOptions)
@@ -82,7 +89,9 @@ class ConferenceActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ConferenceScreen()
+                    ConferenceScreen(
+                        appId = appId
+                    )
                 }
             }
         }
@@ -132,7 +141,7 @@ class ConferenceActivity : ComponentActivity() {
 }
 
 @Composable
-fun ConferenceScreen() {
+fun ConferenceScreen(appId: String) {
     var conferenceName by remember { mutableStateOf("") }
     val context = LocalContext.current
 
@@ -169,7 +178,7 @@ fun ConferenceScreen() {
                 /** Launch the JitsiMeetActivity with the conference name */
                 if (conferenceName.isNotEmpty()) {
                     val options = JitsiMeetConferenceOptions.Builder()
-                        .setRoom(conferenceName)
+                        .setRoom("$appId/$conferenceName")
                         .setVideoMuted(true)
                         .setFeatureFlag("invite.enabled", false)
                         .setFeatureFlag("breakout-rooms.enabled", false)
